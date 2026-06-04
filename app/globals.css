@@ -238,17 +238,11 @@ section {
 
 .hero-name span {
   display: block;
-  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .hero-name .red-accent {
-  background: linear-gradient(135deg, var(--red) 0%, var(--red-light) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--red);
 }
 
 .hero-title {
