@@ -360,14 +360,10 @@ section {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
+  background: linear-gradient(to bottom, transparent 0%, var(--bg-primary) 150px);
   /* Scale originates from top-center so it appears to grow upward */
   transform-origin: 50% 0%;
   /* opacity + transform injected by useScrollStory — starts at 0 */
-
-  /* Subtle top-edge glow — visible as the section rises into view */
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 -40px 80px -20px rgba(255, 255, 255, 0.04);
 }
 
 
