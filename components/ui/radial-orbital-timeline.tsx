@@ -174,10 +174,98 @@ export default function RadialOrbitalTimeline({
         return "text-black bg-white border-black";
       case "pending":
         return "text-white bg-black/40 border-white/50";
-      default:
-        return "text-white bg-black/40 border-white/50";
     }
   };
+
+  const closeModal = () => {
+    setExpandedItems({});
+    setActiveNodeId(null);
+    setPulseEffect({});
+    if (!prefersReducedMotion.current) {
+      autoRotateRef.current = true;
+    }
+  };
+
+  const activeItem = activeNodeId ? timelineData.find((item) => item.id === activeNodeId) : null;
+
+  const renderCardContent = (item: TimelineItem) => (
+    <>
+      <CardHeader 
+        className="px-6 pt-6 pb-4 sm:px-8 sm:pt-8 sm:pb-5"
+        style={{ padding: '1.5rem 1.5rem 1rem 1.5rem' }}
+      >
+        <div className="flex justify-between items-center">
+          <Badge
+            className={`px-2 py-0.5 text-xs ${getStatusStyles(item.status)}`}
+          >
+            {item.status === "completed"
+              ? "COMPLETE"
+              : item.status === "in-progress"
+              ? "IN PROGRESS"
+              : "PENDING"}
+          </Badge>
+          <span className="text-xs font-mono text-white/50">
+            {item.date}
+          </span>
+        </div>
+        <CardTitle className="text-sm mt-3 leading-snug">
+          {item.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent 
+        className="px-6 pb-6 pt-0 sm:px-8 sm:pb-8 sm:pt-0 text-xs text-white/80 leading-relaxed"
+        style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}
+      >
+        <p>{item.content}</p>
+
+        <div className="mt-5 pt-4 border-t border-white/10">
+          <div className="flex justify-between items-center text-xs mb-2">
+            <span className="flex items-center">
+              <Zap size={10} className="mr-1.5" />
+              Progress
+            </span>
+          </div>
+          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+              style={{ width: `${item.energy}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {item.relatedIds.length > 0 && (
+          <div className="mt-5 pt-4 border-t border-white/10">
+            <div className="flex items-center mb-3">
+              <Link size={10} className="text-white/70 mr-1.5" />
+              <h4 className="text-xs uppercase tracking-wider font-medium text-white/70">
+                Connected Nodes
+              </h4>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {item.relatedIds.map((relatedId) => {
+                const relatedItem = timelineData.find((i) => i.id === relatedId);
+                return (
+                  <Button
+                    key={relatedId}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center h-7 px-2.5 py-0 text-xs rounded-none border-white/20 bg-transparent hover:bg-white/10 text-white/80 hover:text-white transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleItem(relatedId);
+                    }}
+                  >
+                    {relatedItem?.title}
+                    <ArrowRight size={10} className="ml-1.5 text-white/60" />
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </>
+  );
 
   return (
     <div
@@ -261,95 +349,39 @@ export default function RadialOrbitalTimeline({
                 </div>
 
                 {isExpanded && (
-                  <Card className="absolute top-20 left-1/2 -translate-x-1/2 w-[280px] sm:w-[320px] bg-[#111111] border-white/30 shadow-2xl overflow-visible" style={{ transform: "translate(-50%, 0) translateZ(0)" }}>
+                  <Card className="hidden sm:block absolute top-20 left-1/2 -translate-x-1/2 w-[320px] bg-[#111111] border-white/30 shadow-2xl overflow-visible" style={{ transform: "translate(-50%, 0) translateZ(0)" }}>
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-px h-3 bg-white/50"></div>
-                    <CardHeader 
-                      className="px-6 pt-6 pb-4 sm:px-8 sm:pt-8 sm:pb-5"
-                      style={{ padding: '1.5rem 1.5rem 1rem 1.5rem' }}
-                    >
-                      <div className="flex justify-between items-center">
-                        <Badge
-                          className={`px-2 py-0.5 text-xs ${getStatusStyles(
-                            item.status
-                          )}`}
-                        >
-                          {item.status === "completed"
-                            ? "COMPLETE"
-                            : item.status === "in-progress"
-                            ? "IN PROGRESS"
-                            : "PENDING"}
-                        </Badge>
-                        <span className="text-xs font-mono text-white/50">
-                          {item.date}
-                        </span>
-                      </div>
-                      <CardTitle className="text-sm mt-3 leading-snug">
-                        {item.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent 
-                      className="px-6 pb-6 pt-0 sm:px-8 sm:pb-8 sm:pt-0 text-xs text-white/80 leading-relaxed"
-                      style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}
-                    >
-                      <p>{item.content}</p>
-
-                      <div className="mt-5 pt-4 border-t border-white/10">
-                        <div className="flex justify-between items-center text-xs mb-2">
-                          <span className="flex items-center">
-                            <Zap size={10} className="mr-1.5" />
-                            Progress
-                          </span>
-                        </div>
-                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
-                            style={{ width: `${item.energy}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      {item.relatedIds.length > 0 && (
-                        <div className="mt-5 pt-4 border-t border-white/10">
-                          <div className="flex items-center mb-3">
-                            <Link size={10} className="text-white/70 mr-1.5" />
-                            <h4 className="text-xs uppercase tracking-wider font-medium text-white/70">
-                              Connected Nodes
-                            </h4>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {item.relatedIds.map((relatedId) => {
-                              const relatedItem = timelineData.find(
-                                (i) => i.id === relatedId
-                              );
-                              return (
-                                <Button
-                                  key={relatedId}
-                                  variant="outline"
-                                  size="sm"
-                                  className="flex items-center h-7 px-2.5 py-0 text-xs rounded-none border-white/20 bg-transparent hover:bg-white/10 text-white/80 hover:text-white transition-all"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleItem(relatedId);
-                                  }}
-                                >
-                                  {relatedItem?.title}
-                                  <ArrowRight
-                                    size={10}
-                                    className="ml-1.5 text-white/60"
-                                  />
-                                </Button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
+                    {renderCardContent(item)}
                   </Card>
                 )}
               </div>
             );
           })}
         </div>
+      </div>
+
+      {/* Mobile Centered Modal Overlay */}
+      <div 
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm sm:hidden transition-all duration-300 ${mounted && activeItem ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={closeModal}
+      >
+        <Card 
+          className={`relative w-full max-w-[320px] bg-[#111111] border-white/30 shadow-2xl overflow-visible transition-all duration-300 transform ${mounted && activeItem ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close Button for Mobile Modal */}
+          <button 
+            onClick={closeModal}
+            className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[#111111] border border-white/30 text-white flex items-center justify-center shadow-lg z-10"
+          >
+            <span className="sr-only">Close</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13 1L1 13M1 1L13 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          
+          {activeItem && renderCardContent(activeItem)}
+        </Card>
       </div>
     </div>
   );
